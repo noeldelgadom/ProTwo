@@ -6,14 +6,21 @@ import datetime
 import requests
 import requests.auth
 import urllib
+import random
 # Create your views here.
 
+articleCount = 20
+
 def nytimes(request):
+    d = {'key' : nytimesList()}
+    return render(request, 'nytimes.html', d)
+    #return HttpResponse(r)
+
+def nytimesList():
     time_period = '1'   # day = 1, week = 7, month = 30
     api_key = '7279eea0382343b18de9593c8d0c8148'
     r = requests.get('https://api.nytimes.com/svc/mostpopular/v2/mostviewed/all-sections/'+time_period+'.json?api-key='+ api_key)
     json_object = r.json()
-    articleCount = 20
 
     articleList = []
     for i in range(articleCount):
@@ -22,13 +29,12 @@ def nytimes(request):
             'abstract' : json_object['results'][i]['abstract'],
             'url' : json_object['results'][i]['url'],
             'pub_date' : json_object['results'][i]['published_date'],
+            'source' : 'NYTimes'
         }
         articleList.append(a)
 
-    d = {'key' : articleList}
+    return articleList
 
-    return render(request, 'nytimes.html', d)
-    #return HttpResponse(r)
 
 #!/usr/bin/env python
 CLIENT_ID = "7U69qIihV3RDIQ"
@@ -120,6 +126,11 @@ if __name__ == '__main__':
 
 
 def reddit(request):
+    d = {'key' : redditList()}
+    return render(request, 'reddit.html', d)
+    #return HttpResponse(r)
+
+def redditList():
     clientID = '7U69qIihV3RDIQ'
     secret = 'R5AbYpT1fXIus7JLLcGkpFt97cc'
     username = 'noeldelgadom'
@@ -128,15 +139,20 @@ def reddit(request):
     json_object = r.json()
 
     articleList = []
-    for i in range(20):
+    for i in range(articleCount):
         a = {
             'title' : json_object['data']['children'][i]['data']['title'],
             'url' : json_object['data']['children'][i]['data']['url'],
             'pub_date' : datetime.datetime.fromtimestamp(json_object['data']['children'][i]['data']['created_utc']).strftime('%Y-%m-%d %H:%M:%S'),
+            'source' : 'reddit',
         }
         articleList.append(a)
 
-    d = {'key' : articleList}
+    return articleList
 
-    return render(request, 'reddit.html', d)
-    #return HttpResponse(r)
+def index(request):
+    articleList = nytimesList() + redditList()
+    random.shuffle(articleList)
+    d = {'key' : articleList}
+    return render(request, 'index.html', d)
+    #return HttpResponse('que tal')
