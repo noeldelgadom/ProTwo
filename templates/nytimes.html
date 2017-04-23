@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>NYT News</title>
+  </head>
+  <body>
+    <h1>The New York Times News</h1>
+
+    {% for i in key %}
+      <table>
+        <tr>
+          <td>{{ i.pub_date }}</td>
+          <td>{{ i.title}}</td>
+          <td><a href="{{ i.url }}">continue reading</a></td>
+        </tr>
+      </table>
+    {% endfor %}
+  </body>
+</html>
