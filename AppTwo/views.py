@@ -140,11 +140,12 @@ def redditList():
 
     articleList = []
     for i in range(articleCount):
+        date = datetime.datetime.fromtimestamp(json_object['data']['children'][i]['data']['created_utc']).strftime('%Y-%m-%d %H:%M:%S')
         a = {
             'title' : json_object['data']['children'][i]['data']['title'],
             'url' : json_object['data']['children'][i]['data']['url'],
-            'pub_date' : datetime.datetime.fromtimestamp(json_object['data']['children'][i]['data']['created_utc']).strftime('%Y-%m-%d %H:%M:%S'),
-            'source' : 'reddit',
+            'pub_date' : date[:10],
+            'source' : 'Reddit',
         }
         articleList.append(a)
 
