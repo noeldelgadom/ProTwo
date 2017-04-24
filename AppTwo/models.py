@@ -4,7 +4,7 @@ from django.db import models
 class Article(models.Model):
 
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=60)
+    title = models.CharField(max_length=120)
     url = models.TextField()
     pub_date = models.DateTimeField(auto_now=True)
     source = models.CharField(max_length=30)

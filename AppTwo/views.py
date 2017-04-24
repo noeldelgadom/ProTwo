@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from flask import Flask, abort, request
+from bs4 import BeautifulSoup
 from uuid import uuid4
 from .models import Article
 import datetime
@@ -8,6 +9,7 @@ import requests
 import requests.auth
 import urllib
 import random
+import json
 # Create your views here.
 
 articleCount = 20
@@ -158,11 +160,66 @@ def redditList():
 
     return articleList
 
+#MEDIUM
+def mediumList():
+    r = requests.get('https://medium.com/top-stories?format=json')
+    string = r.text
+    string = string[16:]
+    json_str = json.loads(string)
+    pub = list()
+    public = json.JSONEncoder()
+
+    articleList = []
+
+    for i in json_str['payload']['value']['posts']:
+        a = {
+            #'id': i['id'],
+            'title': i['title'],
+            #'abstract': i['virtuals']['subtitle'],
+            'url': 'https://medium.com/p/%s' % i['id'],
+            'pub_date': i['createdAt'],
+            'source': 'Medium',
+            #'views': i['latestRev']
+        }
+        articleList.append(a)
+
+    return articleList 
+
+#GitHub
+def githubList():
+    r = requests.get('https://github.com/trending')
+    soup = BeautifulSoup(r.text, 'html.parser')
+    repos = BeautifulSoup(str(soup.find_all("ol", attrs={"class": "repo-list"})), 'html.parser')
+    #rep = BeautifulSoup(str(rep.find_all("li")), 'html.parser')
+    repos_l = []
+
+    for i in repos.find_all('li'):
+        rep = BeautifulSoup(str(i), 'html.parser')
+        a = {
+            #'id': i.a.get('href'),
+            'title': i.div.h3.get_text(),
+            #'abstract': i.p.string,
+            'url': 'https://github.com%s' % i.a.get('href'),
+            'pub_date': '',
+            'source': 'GitHub',
+            #'views': i.find('a', attrs={"class": "muted-link"}).get_text()
+        }
+        repos_l.append(a)
+    
+    
+    return repos_l
+
 def index(request):
-    articleList = nytimesList() + redditList()
+    articleList = nytimesList() + redditList() + mediumList() + githubList()
     random.shuffle(articleList)
     d = {'key' : articleList}
     return render(request, 'index.html', d)
+
+def articles(request):
+    articleList = nytimesList() + redditList() + mediumList() + githubList()
+    random.shuffle(articleList)
+    d = {'key' : articleList}
+    return render(request, 'AppTwo/index.html', d)
 
 def agregarDB(d):
     new_article = Article()

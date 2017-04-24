@@ -21,6 +21,7 @@ from django.conf.urls import include
 urlpatterns = [
     url(r'^nytimes/', views.nytimes, name='nytimes'),
     url(r'^reddit/', views.reddit, name='reddit'),
+    url(r'^articles/', views.articles, name='articles'),
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
 ]

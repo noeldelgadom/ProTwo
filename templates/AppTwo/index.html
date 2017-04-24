@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+  
+{% block content %}
+
+    <h1>Most popular</h1>
+
+    <ul class="collection">
+    {% for i in key %}
+      <li class="collection-item avatar">
+        <i class="material-icons circle">folder</i>
+        <span class="title">{{ i.title}}</span>
+        <p>{{ i.source}}<br>
+          {{ i.pub_date }}
+        </p>
+        <a href="{{ i.url }}" class="secondary-content">Read more... <i class="material-icons">grade</i></a>
+      </li>
+    {% endfor %}
+    </ul>
+
+{% endblock %}
