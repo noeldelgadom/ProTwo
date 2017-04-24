@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from flask import Flask, abort, request
 from uuid import uuid4
+from .models import Article
 import datetime
 import requests
 import requests.auth
@@ -32,6 +33,9 @@ def nytimesList():
             'source' : 'NYTimes'
         }
         articleList.append(a)
+
+    # Save 1st article in database
+    agregarDB(articleList[0])
 
     return articleList
 
@@ -149,6 +153,9 @@ def redditList():
         }
         articleList.append(a)
 
+    # Save 1st article in database
+    agregarDB(articleList[0])
+
     return articleList
 
 def index(request):
@@ -156,4 +163,11 @@ def index(request):
     random.shuffle(articleList)
     d = {'key' : articleList}
     return render(request, 'index.html', d)
-    #return HttpResponse('que tal')
+
+def agregarDB(d):
+    new_article = Article()
+    new_article.title = d['title']
+    new_article.url = d['url']
+    new_article.pub_date = d['pub_date']
+    new_article.source = d['source']
+    new_article.save()
