@@ -37,7 +37,8 @@ def nytimesList():
         articleList.append(a)
 
     # Save 1st article in database
-    agregarDB(articleList[0])
+    for article in articleList:
+        agregarDB(article)
 
     return articleList
 
@@ -156,7 +157,7 @@ def redditList():
         articleList.append(a)
 
     # Save 1st article in database
-    agregarDB(articleList[0])
+    #agregarDB(articleList[0])
 
     return articleList
 
@@ -205,7 +206,8 @@ def githubList():
             #'views': i.find('a', attrs={"class": "muted-link"}).get_text()
         }
         repos_l.append(a)
-    
+    for repo in repos_l:
+        agregarDB(repo)
     
     return repos_l
 
@@ -216,15 +218,18 @@ def index(request):
     return render(request, 'index.html', d)
 
 def articles(request):
-    articleList = nytimesList() + redditList() + mediumList() + githubList()
+    articleList = nytimesList() + mediumList() + githubList()
     random.shuffle(articleList)
     d = {'key' : articleList}
     return render(request, 'AppTwo/index.html', d)
 
 def agregarDB(d):
-    new_article = Article()
-    new_article.title = d['title']
-    new_article.url = d['url']
-    new_article.pub_date = d['pub_date']
-    new_article.source = d['source']
-    new_article.save()
+    try:
+        new_article = Article.objects.get(title = d['title'])
+    except:
+        new_article = Article()
+        new_article.title = d['title']
+        new_article.url = d['url']
+        new_article.pub_date = d['pub_date']
+        new_article.source = d['source']
+        new_article.save()
