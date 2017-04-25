@@ -173,18 +173,19 @@ def mediumList():
     articleList = []
 
     for i in json_str['payload']['value']['posts']:
+        date = datetime.datetime.fromtimestamp(i['createdAt']/1000).strftime('%Y-%m-%d %H:%M:%S')
         a = {
             #'id': i['id'],
             'title': i['title'],
             #'abstract': i['virtuals']['subtitle'],
             'url': 'https://medium.com/p/%s' % i['id'],
-            'pub_date': i['createdAt'],
+            'pub_date' : date[:10],
             'source': 'Medium',
             #'views': i['latestRev']
         }
         articleList.append(a)
 
-    return articleList 
+    return articleList
 
 #GitHub
 def githubList():
@@ -208,7 +209,7 @@ def githubList():
         repos_l.append(a)
     for repo in repos_l:
         agregarDB(repo)
-    
+
     return repos_l
 
 def index(request):
