@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from uuid import uuid4
 from .models import Article
 import datetime
+import time
 import requests
 import requests.auth
 import urllib
@@ -157,8 +158,8 @@ def redditList():
         articleList.append(a)
 
     # Save 1st article in database
-    #agregarDB(articleList[0])
-
+    #for article in articleList:
+    #    agregarDB(article)
     return articleList
 
 #MEDIUM
@@ -184,7 +185,8 @@ def mediumList():
             #'views': i['latestRev']
         }
         articleList.append(a)
-
+    for art in articleList:
+        agregarDB(art)
     return articleList
 
 #GitHub
@@ -192,20 +194,32 @@ def githubList():
     r = requests.get('https://github.com/trending')
     soup = BeautifulSoup(r.text, 'html.parser')
     repos = BeautifulSoup(str(soup.find_all("ol", attrs={"class": "repo-list"})), 'html.parser')
-    #rep = BeautifulSoup(str(rep.find_all("li")), 'html.parser')
     repos_l = []
 
     for i in repos.find_all('li'):
         rep = BeautifulSoup(str(i), 'html.parser')
-        a = {
-            #'id': i.a.get('href'),
-            'title': i.div.h3.get_text(),
-            #'abstract': i.p.string,
-            'url': 'https://github.com%s' % i.a.get('href'),
-            'pub_date': '',
-            'source': 'GitHub',
-            #'views': i.find('a', attrs={"class": "muted-link"}).get_text()
-        }
+        rep_r = requests.get('https://api.github.com/repos%s' % i.a.get('href'))
+        json_rep = json.loads(str(rep_r.text))
+        try:
+            a = {
+                #'id': i.a.get('href'),
+                'title': i.div.h3.get_text(),
+                #'abstract': i.p.string,
+                'url': 'https://github.com%s' % i.a.get('href'),
+                'pub_date': json_rep['created_at'],
+                'source': 'GitHub',
+                #'views': i.find('a', attrs={"class": "muted-link"}).get_text()
+            }
+        except:
+            a = {
+                #'id': i.a.get('href'),
+                'title': i.div.h3.get_text(),
+                #'abstract': i.p.string,
+                'url': 'https://github.com%s' % i.a.get('href'),
+                'pub_date': datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'),
+                'source': 'GitHub',
+                #'views': i.find('a', attrs={"class": "muted-link"}).get_text()
+            }
         repos_l.append(a)
     for repo in repos_l:
         agregarDB(repo)
@@ -218,11 +232,14 @@ def index(request):
     d = {'key' : articleList}
     return render(request, 'index.html', d)
 
-def articles(request):
+def updateArticles():
     articleList = nytimesList() + mediumList() + githubList()
-    random.shuffle(articleList)
-    d = {'key' : articleList}
-    return render(request, 'AppTwo/index.html', d)
+    return articleList
+
+def articles(request):
+    #articleList = updateArticles()
+    #return render(request, 'AppTwo/index.html', {'articles': articleList})
+    return render(request, 'AppTwo/index.html', {'articles': Article.objects.all()})
 
 def agregarDB(d):
     try:
